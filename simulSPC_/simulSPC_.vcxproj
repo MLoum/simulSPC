@@ -159,17 +159,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CEF.h" />
+    <ClInclude Include="CEF_geometric.h" />
     <ClInclude Include="Experiment.h" />
-    <ClInclude Include="MDF.h" />
+    <ClInclude Include="E_field.h" />
     <ClInclude Include="OpticalSetup.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PSF.h" />
+    <ClInclude Include="PSF_gaussian.h" />
+    <ClInclude Include="PSF_planewave.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Solvent.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CEF.cpp" />
+    <ClCompile Include="CEF_geometric.cpp" />
     <ClCompile Include="Experiment.cpp" />
-    <ClCompile Include="MDF.cpp" />
     <ClCompile Include="OpticalSetup.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="pch.cpp">
@@ -178,8 +184,14 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="PSF.cpp" />
+    <ClCompile Include="PSF_gaussian.cpp" />
+    <ClCompile Include="PSF_planewave.cpp" />
     <ClCompile Include="simulSPC_.cpp" />
     <ClCompile Include="Solvent.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="simulSPC_.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

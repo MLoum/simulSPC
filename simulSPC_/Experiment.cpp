@@ -3,6 +3,7 @@
 //
 
 #include "Experiment.h"
+#include <time.h>
 
 void Experiment::tick() {
 
@@ -21,6 +22,11 @@ delete(photon_list);
 }
 
 Experiment::Experiment()  {
+
+	// choosing and random number generator... at "random" for now e.g. gsl_rng_default gsl_rng_taus	 gsl_rng_mt19937
+	rngGenerator_ = gsl_rng_alloc(gsl_rng_taus);
+	// rng seed
+	gsl_rng_set(rngGenerator_, time(NULL));
 
     //TODO read from a txt file.
     // Dummy defulat values

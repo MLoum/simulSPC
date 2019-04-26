@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['r',['R',['../structgsl__eigen__gen__workspace.html#a5e9eee7bcce788dc510177e31d163622',1,'gsl_eigen_gen_workspace::R()'],['../structgsl__multifit__robust__stats.html#a289d9e2b861bcf110f5a9beed1ff0023',1,'gsl_multifit_robust_stats::r()'],['../structgsl__multifit__robust__workspace.html#ac91dce3f82708ed87f2a739f0a56b4f6',1,'gsl_multifit_robust_workspace::r()']]],
+  ['range',['range',['../structgsl__histogram.html#a3c1ec084af3ef209f44ec3512619d321',1,'gsl_histogram::range()'],['../structgsl__histogram__pdf.html#a52116802e9ebc4858c4feec331573219',1,'gsl_histogram_pdf::range()']]],
+  ['rcond',['rcond',['../structgsl__multifit__linear__workspace.html#a5c2b8dfc143c2c3ca889df5e21887a38',1,'gsl_multifit_linear_workspace::rcond()'],['../structgsl__multifit__nlinear__solver.html#a5095d182d8b8331460e67b628901992a',1,'gsl_multifit_nlinear_solver::rcond()'],['../structgsl__multifit__nlinear__type.html#a5825b6d22294c04bc86a3c7090b8a566',1,'gsl_multifit_nlinear_type::rcond()'],['../structgsl__multilarge__linear__type.html#a9c42604854e6fe7c2f9006425da2f864',1,'gsl_multilarge_linear_type::rcond()'],['../structgsl__multilarge__nlinear__solver.html#a8601b1de73abfc16d7d7423daf38fcd3',1,'gsl_multilarge_nlinear_solver::rcond()'],['../structgsl__multilarge__nlinear__type.html#a7bd6031f6b456796566ddeed5b91e24c',1,'gsl_multilarge_nlinear_type::rcond()']]],
+  ['rdepth',['rdepth',['../structgsl__integration__cquad__ival.html#a9421064cedd6c4c935b9f65c32f01e3f',1,'gsl_integration_cquad_ival']]],
+  ['refractive_5findex_5f',['refractive_index_',['../class_solvent.html#a85f53dc5032f2a4a456c4f7c19de4a0d',1,'Solvent']]],
+  ['reset',['reset',['../structgsl__multilarge__linear__type.html#afd88f543b495b60b2e10eedc16b7434e',1,'gsl_multilarge_linear_type::reset()'],['../structgsl__odeiv__step__type.html#a64147cfd288fe5edf4ff73073e442198',1,'gsl_odeiv_step_type::reset()'],['../structgsl__odeiv2__step__type.html#a68dde16db8290009a501348654d97ee7',1,'gsl_odeiv2_step_type::reset()']]],
+  ['resfac',['resfac',['../structgsl__multifit__robust__workspace.html#a3069c04a5ac2be1c05302991970249e2',1,'gsl_multifit_robust_workspace']]],
+  ['restart',['restart',['../structgsl__multimin__fdfminimizer__type.html#a25a9f3764f6cf25069b88ee064337d35',1,'gsl_multimin_fdfminimizer_type']]],
+  ['result',['result',['../structgsl__monte__vegas__state.html#af22c2960ad4a70621e420802196a84a1',1,'gsl_monte_vegas_state']]],
+  ['rg',['rg',['../structgsl__integration__qaws__table.html#a0e69efa575f8c95b9911a79a012af386',1,'gsl_integration_qaws_table']]],
+  ['rh',['rh',['../structgsl__integration__qaws__table.html#a8dcc87d794a9c07d855ee5efb5b494c7',1,'gsl_integration_qaws_table']]],
+  ['ri',['ri',['../structgsl__integration__qaws__table.html#a11147358c6523924a504e09a3f45804e',1,'gsl_integration_qaws_table']]],
+  ['rj',['rj',['../structgsl__integration__qaws__table.html#aed8819e06da5dd7ca842a5fcc97abce0',1,'gsl_integration_qaws_table']]],
+  ['rlist',['rlist',['../structgsl__integration__workspace.html#ade289d88301255d45d7aaf10aba916d7',1,'gsl_integration_workspace']]],
+  ['rmse',['rmse',['../structgsl__multifit__robust__stats.html#a27f8591d7e3b43a687bf8a8aa9b91557',1,'gsl_multifit_robust_stats']]],
+  ['rnggenerator_5f',['rngGenerator_',['../class_experiment.html#a8a5791196498ecc0be89ad6b6274d950',1,'Experiment']]],
+  ['root',['root',['../structgsl__root__fsolver.html#ab7b9c2837bc0cb760596baaceca53686',1,'gsl_root_fsolver::root()'],['../structgsl__root__fdfsolver.html#ab7dad64be295fb31d08e1011ce08ecff',1,'gsl_root_fdfsolver::root()']]],
+  ['rsq',['Rsq',['../structgsl__multifit__robust__stats.html#ac85653a9da959cd245cf96f50a81ca62',1,'gsl_multifit_robust_stats']]]
+];
