@@ -16,11 +16,23 @@ void Experiment::tick() {
         // Photon probability -> branching
 		//TODO 
     }
+
+	//photon_vector_.push_back(photon);
 }
 
 Experiment::~Experiment() {
 delete[] particle_list;
 delete[] photon_list;
+}
+
+void Experiment::convertPhoton_vectorToList()
+{
+	if (photon_list != NULL)
+		delete[] photon_list;
+	photon_list = new __int64[photon_vector_.size()];
+
+	for (int i = 0; i < photon_vector_.size(); i++)
+		photon_list[i] = photon_vector_[i].compress_data();
 }
 
 Experiment::Experiment()  {

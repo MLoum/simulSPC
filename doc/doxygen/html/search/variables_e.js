@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['temperature_5f',['temperature_',['../class_solvent.html#ac4809f066572b1ed84e4e3c6d8187941',1,'Solvent']]],
-  ['time_5fstep_5f',['time_step_',['../class_experiment.html#a0e734c012329c16905ed3b0172cc3bd8',1,'Experiment']]],
-  ['tube_5flens_5ffocal_5flength',['tube_lens_focal_length',['../structobjective.html#a58162131f22b317ed22d45d6c016914f',1,'objective']]]
+  ['solvent_5f',['solvent_',['../class_experiment.html#a3467c9ab01dbf1c760fd446b101cb3c9',1,'Experiment']]],
+  ['space_5fstep_5f',['space_step_',['../class_experiment.html#a3a280a1cd40ed9fdae5d37669f24b7d8',1,'Experiment']]]
 ];

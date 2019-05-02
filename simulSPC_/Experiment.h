@@ -22,7 +22,9 @@ class MDF;
 #include "Solvent.h"
 #include "Particle.h"
 #include "MDF.h"
+#include "Photon.h"
 #include <gsl/gsl_randist.h>
+#include <vector>
 
 
 class OpticalSetup;
@@ -63,6 +65,7 @@ public:
     int nb_of_particle_;
 
     Particle *particle_list; //!< Array of particle
+	std::vector<Photon> photon_vector_;   
     long long *photon_list; //!< Array of the time arrivals (in clock tick unit) of the collected photon. This is the main output of the software.
 
 public:
@@ -74,7 +77,7 @@ public:
 
     Experiment();
     ~Experiment();
-
+	void convertPhoton_vectorToList();
 };
 
 

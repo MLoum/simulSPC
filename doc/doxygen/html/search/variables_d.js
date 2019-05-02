@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['solvent_5f',['solvent_',['../class_experiment.html#a3467c9ab01dbf1c760fd446b101cb3c9',1,'Experiment']]],
-  ['space_5fstep_5f',['space_step_',['../class_experiment.html#a3a280a1cd40ed9fdae5d37669f24b7d8',1,'Experiment']]]
+  ['r_5fhydro_5f',['r_hydro_',['../class_particle.html#a31a83a9e1517750eb04bbd6f8e10e477',1,'Particle']]],
+  ['refractive_5findex_5f',['refractive_index_',['../class_solvent.html#a85f53dc5032f2a4a456c4f7c19de4a0d',1,'Solvent']]],
+  ['rnggenerator_5f',['rngGenerator_',['../class_experiment.html#a8a5791196498ecc0be89ad6b6274d950',1,'Experiment']]]
 ];

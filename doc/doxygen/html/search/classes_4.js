@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['objective',['objective',['../structobjective.html',1,'']]],
-  ['opticalsetup',['OpticalSetup',['../class_optical_setup.html',1,'']]]
+  ['mdf',['MDF',['../class_m_d_f.html',1,'']]],
+  ['mdf_5fgaussian',['MDF_gaussian',['../class_m_d_f__gaussian.html',1,'']]]
 ];
