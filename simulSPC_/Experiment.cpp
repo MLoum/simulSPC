@@ -3,6 +3,7 @@
 //
 
 #include "Experiment.h"
+#include "MDF_gaussian.h"
 #include <time.h>
 
 void Experiment::tick() {
@@ -13,12 +14,13 @@ void Experiment::tick() {
 //        particle_list[i].inter_particle_interraction();
         particle_list[i].light_matter_interraction();
         // Photon probability -> branching
+		//TODO 
     }
 }
 
 Experiment::~Experiment() {
-delete(particle_list);
-delete(photon_list);
+delete[] particle_list;
+delete[] photon_list;
 }
 
 Experiment::Experiment()  {
@@ -29,7 +31,7 @@ Experiment::Experiment()  {
 	gsl_rng_set(rngGenerator_, time(NULL));
 
     //TODO read from a txt file.
-    // Dummy defulat values
+    // Dummy default values
     nb_of_particle_ = 10;
     time_step_ = 50;
     space_step_ = 100;
@@ -37,12 +39,18 @@ Experiment::Experiment()  {
     solvent_.box_size_radial_ = 1E5;
     solvent_.box_size_axial_ = 5E5;
 
+	opticalSetup_.laser_exc_.wl = 405;
+	opticalSetup_.laser_exc_.intensity = 1;
+	opticalSetup_.objective_.NA = 0.95;
+
     particle_list = new Particle[nb_of_particle_];
     for(int i=0; i<nb_of_particle_; i++)
         particle_list[i].initParticleParam(this);
 
     photon_list = new __int64[1000000];
 
-    // create PSF, CEF and MDR
+    // create PSF, CEF and MDF
+	// TODO read from file the type of MDF.
+	mdf_ = new MDF_gaussian(this);
     
 }

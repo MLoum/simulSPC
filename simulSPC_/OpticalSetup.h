@@ -14,6 +14,7 @@ struct laser_exc
 {
     double wl; //!< in nanometer
     double intensity; //!< in mW. Laser intensity, that is to say the laser power integrated on all the the beam surface 
+	//TODO polarisation
 };
 
 

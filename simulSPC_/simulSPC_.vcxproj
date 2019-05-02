@@ -163,6 +163,8 @@
     <ClInclude Include="CEF_geometric.h" />
     <ClInclude Include="Experiment.h" />
     <ClInclude Include="E_field.h" />
+    <ClInclude Include="MDF.h" />
+    <ClInclude Include="MDF_gaussian.h" />
     <ClInclude Include="OpticalSetup.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="pch.h" />
@@ -176,6 +178,8 @@
     <ClCompile Include="CEF.cpp" />
     <ClCompile Include="CEF_geometric.cpp" />
     <ClCompile Include="Experiment.cpp" />
+    <ClCompile Include="MDF.cpp" />
+    <ClCompile Include="MDF_gaussian.cpp" />
     <ClCompile Include="OpticalSetup.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="pch.cpp">

@@ -18,8 +18,9 @@ class Experiment;
  */
 class Particle
 {
-private :
+public :
     double x_, y_, z_; //!< position in nanometer
+	double phi1_, phi2_, phi_3; 
 
     
     double Dx_, Dy_, Dz_;	//!<  translationnal diffusion coefficients in nm^2 .ns-1

@@ -51,6 +51,12 @@
     <ClInclude Include="E_field.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="MDF.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="MDF_gaussian.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -84,6 +90,12 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="PSF_planewave.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="MDF.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="MDF_gaussian.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

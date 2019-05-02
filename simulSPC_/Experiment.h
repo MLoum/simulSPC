@@ -17,18 +17,21 @@
  * \copyright Moltech-Anjou UMR6200 Samson Team
  */
 
+class MDF;
 #include "OpticalSetup.h"
 #include "Solvent.h"
 #include "Particle.h"
-#include "PSF.h"
+#include "MDF.h"
 #include <gsl/gsl_randist.h>
 
 
 class OpticalSetup;
 class Solvent;
 class Particle;
-class PSF;
-class CEF;
+//class PSF;
+//class CEF;
+
+//class MDF_gaussian;
 
 //typedef long long __int64;
 //typedef unsigned long long __uint64;
@@ -47,14 +50,13 @@ class Experiment{
 
 public:
 	friend class Particle;
-	friend class PSF;
-	friend class CEF;
     double time_step_; //!< Time step of the simulation in \b nanosecond, typical value 50ns
     double space_step_; //!< Space step in \b nanometer for the PSF and CEF if they are pre-computed, typical value 50nm (lambda/10)
     Solvent solvent_; //!< See the corresponding class
     OpticalSetup opticalSetup_; //!< See the corresponding class
-	PSF *psf_; //!< See the corresponding class
-	CEF *cef_; //!< See the corresponding class
+	//PSF *psf_; //!< See the corresponding class
+	//CEF *cef_; //!< See the corresponding class
+	MDF *mdf_; //!< See the corresponding class
 
 	gsl_rng *rngGenerator_; //!< GSL algorithm for random number generation.
 

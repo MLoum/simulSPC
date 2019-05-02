@@ -25,10 +25,15 @@ void Particle::initParticleParam(Experiment *exp)
 {
     exp_ = exp;
 
-    //TODO from File
+    //TODO from File and gaussian distribution.
     Dx_ = 5E-3;
     Dy_ = 5E-3;
     Dz_ = 5E-3;
+
+	abs_cross_section_ = 1E-16;
+	quantum_yield_ = 0.95;
+
+	//TODO precomputed value of abs_cross_section_/(h*nu)*quantum_yield_
 
     x_ = gsl_rng_uniform(exp_->rngGenerator_) * exp_->solvent_.box_size_radial_;
     y_ = gsl_rng_uniform(exp_->rngGenerator_) * exp_->solvent_.box_size_radial_;
@@ -68,39 +73,22 @@ Particle::~Particle() {
 
 void Particle::light_matter_interraction() {
 	
-	// 1) Get PSF at particle position
-	//exp_->psf_->get_E_field(*this);
+	// 1) Based on particle position, angle, absorption cross-section and so on, calculate 
+	//via the Molecular Detection Efficiency Function (MDF), the probability to detect a photon from the molecule.	
+	double photon_probability = exp_->mdf_->get_detection_efficiency(this);
 
-	// 2) calculate the mean number of absorbed and then reemited photon during one tick of the experiment
-
-	// 3) Calculate the probability is collected by the microscope via the CEF
-	double photon_probability = 0.5;
-
-
-	// 4) Knowing the mean probability of counting a photon, use poissonian statistics to see if it is the case.
+	// 2) Knowing the mean probability of counting a photon, use poissonian statistics to see if it is the case.
 	if (gsl_ran_poisson(exp_->rngGenerator_, photon_probability) > 0)
+	{
+		// A photon was detected
+		// Inform the exp structure to
 		int dummy_photon = 1;
 
-	/*
-	if (GL_diffAngulaire)
-	{
-		CoeffAbsorption = pow(sin(p->Theta)*cos(p->Phi), 4); //Absorption à 2 photons linéaire laser polarisé en x
-		CoeffEmission = pow(sin(p->Theta), 2);;								// collection sans polariseur
-		coeffDipoleScalaireChampElec = CoeffAbsorption * CoeffEmission; //2photons
+		//TODO microtime.
 	}
-	else
-		coeffDipoleScalaireChampElec = 1;
+		
 
-	if (OpticalSetup->ProfilExcitation[r][(int)(p->z)] == 0)
-	{
-		*NbreMoyenPhotonEmis = 0;	return;
-	}
 
-	up->IntensiteLaserenW * OpticalSetup->ProfilExcitation[r][(int)(p->z)];
-
-	if (OpticalSetup->TypeExcitation == MONO_PHOTONIQUE)	
-		*NbreMoyenPhotonEmis = ProfilIntensiteA_endroitParticule / OpticalSetup->EnergiePhoton * p->SectionEfficace * p->RendementQuantique * Param->pasDeTemps * 1e-9;
-	*/
 
 	
 }
