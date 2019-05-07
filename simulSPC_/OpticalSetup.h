@@ -5,6 +5,7 @@
 #ifndef SIMULSPC_OPTICALSETUP_H
 #define SIMULSPC_OPTICALSETUP_H
 
+
 /**
  * \brief     Excitation Laser
  *
@@ -51,7 +52,6 @@ struct APD
 class OpticalSetup
 {
 public:
-
     laser_exc laser_exc_;
     objective objective_;
     double confocal_pinhole_diameter; //!< in micrometer

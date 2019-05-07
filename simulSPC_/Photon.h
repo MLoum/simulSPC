@@ -10,7 +10,7 @@ public:
 	{
 		macrotime_ = macrotime;  microtime_ = microtime;  channel_ = channel;
 	}
-	__int64 compress_data() {return macrotime_ + (microtime_) >> 40 + (channel_ >> 56); }
+	__int64 compress_data() {return macrotime_ + (( __int64)(microtime_) >> 40) + ((__int64)(channel_) >> 56); }
 	~Photon() {};
 };
 

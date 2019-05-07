@@ -5,11 +5,15 @@
 
 double MDF_gaussian::get_detection_efficiency(Particle *p)
 {
-	// double r = ;
-	// double z = ;
+	double r_absolue = sqrt((p->x_ * p->x_) + (p->y_ * p->y_));
+	double z_absolue = p->z_;
+
+	int r = (int)r_absolue / exp_->space_step_;
+	int z = (int)z_absolue / exp_->space_step_;
+
 	//double photon_probability = mdf_[r][z] * p->abs_cross_section_ * p->quantum_yield_;
-	// return photon_probability;
-	return 0;
+	//return photon_probability;
+	return mdf_[r][z] * p->abs_cross_section_ * p->quantum_yield_;
 }
 
 MDF_gaussian::MDF_gaussian(Experiment *experiment, double r)
@@ -17,7 +21,7 @@ MDF_gaussian::MDF_gaussian(Experiment *experiment, double r)
 	exp_ = experiment;
 	r_ = r;
 
-	int nb_step_r = (int)(exp_->solvent_.box_size_axial_ / exp_->space_step_);
+	int nb_step_r = (int)(sqrt(2) * exp_->solvent_.box_size_axial_ / exp_->space_step_);
 	int nb_step_z = (int)(exp_->solvent_.box_size_radial_ / exp_->space_step_);
 
 	//allocation (https://stackoverflow.com/questions/936687/how-do-i-declare-a-2d-array-in-c-using-new)

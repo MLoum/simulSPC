@@ -18,14 +18,18 @@
  */
 
 class MDF;
-#include "OpticalSetup.h"
+#include <vector>
+#include <fstream>
+#include <string>
+#include <iostream>
+#include <algorithm>
 #include "Solvent.h"
 #include "Particle.h"
 #include "MDF.h"
 #include "Photon.h"
 #include <gsl/gsl_randist.h>
-#include <vector>
 
+using namespace std;
 
 class OpticalSetup;
 class Solvent;
@@ -64,9 +68,13 @@ public:
 
     int nb_of_particle_;
 
-    Particle *particle_list; //!< Array of particle
-	std::vector<Photon> photon_vector_;   
-    long long *photon_list; //!< Array of the time arrivals (in clock tick unit) of the collected photon. This is the main output of the software.
+	__int64 macroClock_; //!< Clock for the experiment. At each tick it increase by one. If a photon is detected its arrival time is equal to macroClock_;
+
+    Particle *particle_list_; //!< Array of particle
+	std::vector<Photon> photon_vector_;   //!< Vector of the generated photon (time arrivals (in clock tick unit), microtime, channel). This is the main output of the software.
+    long long *photon_array_; 
+
+	vector<string> iniFilevector_;
 
 public:
 	/**
@@ -78,6 +86,10 @@ public:
     Experiment();
     ~Experiment();
 	void convertPhoton_vectorToList();
+	void write_photon_vector();
+
+	void read_ini_file();
+	double init_parameter(std::string parameter, char start, char end);
 };
 
 

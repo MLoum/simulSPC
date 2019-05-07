@@ -40,6 +40,11 @@ void Particle::initParticleParam(Experiment *exp)
     z_ = gsl_rng_uniform(exp_->rngGenerator_) * exp_->solvent_.box_size_radial_;
 }
 
+void Particle::brownianMotionTest()
+{
+	//TODO Copy the first version
+}
+
 void Particle::move() {
 
     //TODO Dx * exp_->time_step_ change unit to spare a multiplciation
@@ -71,7 +76,7 @@ Particle::~Particle() {
 
 }
 
-void Particle::light_matter_interraction() {
+bool Particle::light_matter_interraction() {
 	
 	// 1) Based on particle position, angle, absorption cross-section and so on, calculate 
 	//via the Molecular Detection Efficiency Function (MDF), the probability to detect a photon from the molecule.	
@@ -81,16 +86,11 @@ void Particle::light_matter_interraction() {
 	if (gsl_ran_poisson(exp_->rngGenerator_, photon_probability) > 0)
 	{
 		// A photon was detected
-		// Inform the exp structure to
-		int dummy_photon = 1;
-
 		//TODO microtime.
+		return true;
 	}
-		
-
-
-
-	
+	else
+		return false;	
 }
 
 void Particle::inter_particle_interraction(){

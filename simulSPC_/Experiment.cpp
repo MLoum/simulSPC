@@ -3,66 +3,125 @@
 //
 
 #include "Experiment.h"
+#include "OpticalSetup.h"
 #include "MDF_gaussian.h"
 #include <time.h>
+#include <fstream>
+using namespace std;
 
 void Experiment::tick() {
 
+	bool is_onePhotonDetected = false;
+
     for(int i=0; i<nb_of_particle_; i++)
     {
-        particle_list[i].move();
-//        particle_list[i].inter_particle_interraction();
-        particle_list[i].light_matter_interraction();
-        // Photon probability -> branching
-		//TODO 
+        particle_list_[i].move();
+//        particle_list_[i].inter_particle_interraction();
+		if(!is_onePhotonDetected)
+		{ 
+			// Photon probability -> branching
+			if (particle_list_[i].light_matter_interraction())
+			{
+				Photon ph(macroClock_, 0, 0);
+				photon_vector_.push_back(ph);
+				// Only one photon can be measured for one tick of the experiment. Hence 
+				// if one photon is detected, there is no need to compute the light_matter_interraction for the others particles.
+				is_onePhotonDetected = true;
+			}
+		}
+		macroClock_++;
     }
 
-	//photon_vector_.push_back(photon);
 }
 
 Experiment::~Experiment() {
-delete[] particle_list;
-delete[] photon_list;
+delete[] particle_list_;
+delete[] photon_array_;
 }
 
 void Experiment::convertPhoton_vectorToList()
 {
-	if (photon_list != NULL)
-		delete[] photon_list;
-	photon_list = new __int64[photon_vector_.size()];
+	if (photon_array_ != NULL)
+		delete[] photon_array_;
+	photon_array_ = new __int64[photon_vector_.size()];
 
 	for (int i = 0; i < photon_vector_.size(); i++)
-		photon_list[i] = photon_vector_[i].compress_data();
+		photon_array_[i] = photon_vector_[i].compress_data();
 }
 
-Experiment::Experiment()  {
+Experiment::Experiment() : photon_vector_(0) 
+{
 
 	// choosing and random number generator... at "random" for now e.g. gsl_rng_default gsl_rng_taus	 gsl_rng_mt19937
 	rngGenerator_ = gsl_rng_alloc(gsl_rng_taus);
 	// rng seed
 	gsl_rng_set(rngGenerator_, time(NULL));
 
-    //TODO read from a txt file.
-    // Dummy default values
-    nb_of_particle_ = 10;
-    time_step_ = 50;
-    space_step_ = 100;
+	read_ini_file();
 
-    solvent_.box_size_radial_ = 1E5;
-    solvent_.box_size_axial_ = 5E5;
+	solvent_.box_size_radial_ = init_parameter("box_size_radial=", '=', ';');
+	solvent_.box_size_axial_ = init_parameter("box_size_axial=", '=', ';');
 
-	opticalSetup_.laser_exc_.wl = 405;
-	opticalSetup_.laser_exc_.intensity = 1;
-	opticalSetup_.objective_.NA = 0.95;
+	opticalSetup_.laser_exc_.wl = init_parameter("laser_wl=", '=', ';');
+	opticalSetup_.laser_exc_.intensity = init_parameter("laser_intensity=", '=', ';');
+	opticalSetup_.objective_.NA = init_parameter("objective_NA=", '=', ';');
 
-    particle_list = new Particle[nb_of_particle_];
+    particle_list_ = new Particle[nb_of_particle_];
     for(int i=0; i<nb_of_particle_; i++)
-        particle_list[i].initParticleParam(this);
+        particle_list_[i].initParticleParam(this);
 
-    photon_list = new __int64[1000000];
 
     // create PSF, CEF and MDF
 	// TODO read from file the type of MDF.
 	mdf_ = new MDF_gaussian(this);
     
+}
+
+void Experiment::write_photon_vector()
+{
+	int array_size = photon_vector_.size();
+	convertPhoton_vectorToList();
+
+	ofstream export_flux("photon_list.txt", ios::out | ios::binary);
+
+	//TODO header of the binary file with the time_stamp_unit.
+	for (int i = 0; i < array_size; i++)
+	{
+		export_flux << photon_array_[i] << endl;
+	}
+
+}
+
+void Experiment::read_ini_file()
+{
+	ifstream data("parameters_data.txt");
+	std::string line;
+	while (getline(data, line))
+	{
+		iniFilevector_.push_back(line);
+	}
+}
+
+double Experiment::init_parameter(std::string parameter, char start, char end)
+{
+	int found;
+	int pos_start;
+	int pos_end;
+	std::string value;
+	double numerical_value = 0;
+
+	for (int i = 0; i < iniFilevector_.size(); i++)
+	{
+		if (iniFilevector_[i].find(parameter) >= 0)
+		{
+			pos_start = iniFilevector_[i].find(start);
+			pos_end = iniFilevector_[i].find(end);
+			for (int j = pos_start + 1; j < pos_end; j++)
+			{
+				value += iniFilevector_[i][j];
+			}
+			numerical_value = stod(value);
+		}
+	}
+	return numerical_value;
 }

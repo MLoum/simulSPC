@@ -49,9 +49,10 @@ public:
 				Third, Based on the particle position and its angular orientation and its emission pattern, calculate (via the CEF) the probability that an eventual emitted photon is effectively collected by the microscope 
 				Fourth, Knowing the mean probability of counting a photon, use poissonian statistics to see if it is the case.
 
+		\return Return TRUE if a photon emitted by this particle was detected 
 	 *
 	 */
-    void light_matter_interraction();
+    bool light_matter_interraction();
 	/**
 	 * \brief    Called at each tick of the main clock for each particle. Simulate the interractions between close enough particles (like aggregation or FRET) during one tick the main clock
 	 * \details   Empty for the time being
@@ -65,6 +66,14 @@ public:
 	*	\sa Experiment
 	 */
     void initParticleParam(Experiment *exp);
+
+	//void set_exp(Experiment *exp) {exp_ = exp;}
+	/**
+	 * \brief    Export in a text file the translational and angular position of a particle in order to test its adequacy with a brownian motion
+	*	\sa Experiment
+	 */
+	void brownianMotionTest();
+
 };
 
 #endif //SIMULSPC_PARTICLE_H

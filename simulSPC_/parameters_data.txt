@@ -1,0 +1,22 @@
+#Exp
+  #Solvant
+    viscosity=;
+    temperature=;
+    box_size_radial=1E5;
+    box_size_axial=5E5;
+    refractive index=;
+  #Optical_setup
+    laser_wl=405;
+    laser_intensity=1;
+    objective_NA=0.95;
+  #Parameter
+    nb_of_particule=10;
+    time_step=50;
+    space_step=100;
+  #Particule
+    Dx=5E-3;
+    Dy=5E-3;
+    Dz=5E-3;
+    r_hydro=;
+    cross_section=1E-16;
+    quantum_yiel=0.95;

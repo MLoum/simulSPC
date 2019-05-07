@@ -34,6 +34,8 @@ Experiment exp;
 for(int i=0 ; i < 20; i++)
 	exp.tick();
 	
+	exp.write_photon_vector();
+
 	return 0;
 	
 
