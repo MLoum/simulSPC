@@ -72,9 +72,11 @@ public:
 
     Particle *particle_list_; //!< Array of particle
 	std::vector<Photon> photon_vector_;   //!< Vector of the generated photon (time arrivals (in clock tick unit), microtime, channel). This is the main output of the software.
-    long long *photon_array_; 
+    __int64 *photon_array_; 
 
 	vector<string> iniFilevector_;
+
+	unsigned int num_cpus_;
 
 public:
 	/**
@@ -89,7 +91,7 @@ public:
 	void write_photon_vector();
 
 	void read_ini_file();
-	double init_parameter(std::string parameter, char start, char end);
+	double init_parameter(string parameter, int ligne_start, int ligne_end);
 };
 
 

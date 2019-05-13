@@ -5,39 +5,39 @@
 #include "Particle.h"
 #include <stdio.h>
 #include <gsl/gsl_randist.h>
-//#include <random>
+#define PI 3.1415159265
+#define kb 1.38E-23
 
 Particle::Particle(Experiment &exp) {
 
     exp_ = &exp;
-
-    //TODO from File
-    Dx_ = 5E-3;
-    Dy_ = 5E-3;
-    Dz_ = 5E-3;
 
     x_ = gsl_rng_uniform(exp_->rngGenerator_);
     y_ = gsl_rng_uniform(exp_->rngGenerator_);
     z_ = gsl_rng_uniform(exp_->rngGenerator_);
 }
 
-void Particle::initParticleParam(Experiment *exp)
+void Particle::initParticleParam(Experiment *exp, int ligne_start, int ligne_end)
 {
     exp_ = exp;
 
-    //TODO from File and gaussian distribution.
-    Dx_ = 5E-3;
-    Dy_ = 5E-3;
-    Dz_ = 5E-3;
+	double r_hydro_max, r_hydro_sigma;
 
-	abs_cross_section_ = 1E-16;
-	quantum_yield_ = 0.95;
+	r_hydro_max = exp_->init_parameter("r_hydro=", ligne_start, ligne_end);
+	r_hydro_sigma = exp_->init_parameter("r_hydro=", ligne_start, ligne_end);
+
+	r_hydro_ = gsl_ran_gaussian(exp_->rngGenerator_, r_hydro_sigma * r_hydro_max / 100) + r_hydro_max;
+
+	abs_cross_section_ = exp_->init_parameter("cross_section=", ligne_start, ligne_end);
+	quantum_yield_ = exp_->init_parameter("quantum_yield=",  ligne_start, ligne_end);
+
+	Dx_ = 1E9 * (kb * exp_->solvent_.temperature_) / (6 * PI * exp_->solvent_.viscosity_ * r_hydro_ * 1E-9);
 
 	//TODO precomputed value of abs_cross_section_/(h*nu)*quantum_yield_
 
     x_ = gsl_rng_uniform(exp_->rngGenerator_) * exp_->solvent_.box_size_radial_;
     y_ = gsl_rng_uniform(exp_->rngGenerator_) * exp_->solvent_.box_size_radial_;
-    z_ = gsl_rng_uniform(exp_->rngGenerator_) * exp_->solvent_.box_size_radial_;
+    z_ = gsl_rng_uniform(exp_->rngGenerator_) * exp_->solvent_.box_size_axial_;
 }
 
 void Particle::brownianMotionTest()
@@ -51,8 +51,6 @@ void Particle::move() {
     x_ += Dx_ * gsl_ran_gaussian(exp_->rngGenerator_, 1) * exp_->time_step_;
     y_ += Dy_ * gsl_ran_gaussian(exp_->rngGenerator_, 1) * exp_->time_step_;
     z_ += Dz_ * gsl_ran_gaussian(exp_->rngGenerator_, 1) * exp_->time_step_;
-
-    // printf("%f %f %f\n", x_, y_, z_);
 
     // Periodic boundary condition
     if(x_ < 0)
@@ -101,4 +99,10 @@ void Particle::inter_particle_interraction(){
 Particle::Particle()
 {
 
+}
+
+/* Debug function that should disappear at some point*/
+void Particle::display_particle_position()
+{
+	cout << x_ << "; " << y_ << "; " << z_ << "; " << endl;
 }

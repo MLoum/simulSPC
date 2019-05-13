@@ -11,9 +11,10 @@ double MDF_gaussian::get_detection_efficiency(Particle *p)
 	int r = (int)r_absolue / exp_->space_step_;
 	int z = (int)z_absolue / exp_->space_step_;
 
-	//double photon_probability = mdf_[r][z] * p->abs_cross_section_ * p->quantum_yield_;
-	//return photon_probability;
-	return mdf_[r][z] * p->abs_cross_section_ * p->quantum_yield_;
+	double photon_probability = mdf_[r][z] * p->abs_cross_section_ * p->quantum_yield_;
+
+	return photon_probability;
+
 }
 
 MDF_gaussian::MDF_gaussian(Experiment *experiment, double r)

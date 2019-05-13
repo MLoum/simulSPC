@@ -6,7 +6,10 @@
 #define SIMULSPC_PARTICLE_H
 
 #include "Experiment.h"
+#include "math.h"
+//random -> still needed ?
 #include <random>
+#include <iostream>
 
 class Experiment;
 
@@ -62,10 +65,11 @@ public:
 
     //void set_exp(Experiment *exp) {exp_ = exp;}
 	/**
-	 * \brief    Method called just after the instanciation of an array of particle and acting as a constructor.
+	 * \brief    Method called just aftr the instanciation of an array of particle and acting as a constructor.
+				It initialize a particle based on the information gathered from the ini file.
 	*	\sa Experiment
 	 */
-    void initParticleParam(Experiment *exp);
+	void initParticleParam(Experiment* exp, int ligne_start, int ligne_end);
 
 	//void set_exp(Experiment *exp) {exp_ = exp;}
 	/**
@@ -74,6 +78,7 @@ public:
 	 */
 	void brownianMotionTest();
 
+	void display_particle_position();
 };
 
 #endif //SIMULSPC_PARTICLE_H
