@@ -5,16 +5,67 @@
 
 double MDF_gaussian::get_detection_efficiency(Particle *p)
 {
-	double r_absolue = sqrt((p->x_ * p->x_) + (p->y_ * p->y_));
-	double z_absolue = p->z_;
+	double r_centre_décimal = sqrt((p->x_ * p->x_) + (p->y_ * p->y_));
+	double z_centre_décimal = p->z_;
 
-	int r = (int)r_absolue / exp_->space_step_;
-	int z = (int)z_absolue / exp_->space_step_;
+	int r_centre_entier = (int)r_centre_décimal / exp_->space_step_;
+	int z_centre_entier = (int)z_centre_décimal / exp_->space_step_;
+	double photon_probability(0);
 
-	double photon_probability = mdf_[r][z] * p->abs_cross_section_ * p->quantum_yield_;
+	int x_centre, y_centre, z_centre;
+	int x_min, y_min, z_min;
+	int x_max, y_max, z_max;
+	int nb_step_x, nb_step_y, nb_step_z;
+	double R;
+	int r;
+	double MDF_totale(0), nb_case(0);
+
+	if (p->r_hydro_ < exp_->space_step_ / 2)
+	{
+		photon_probability = mdf_[r_centre_entier][z_centre_entier] * p->abs_cross_section_ * p->quantum_yield_;
+	}
+	else
+	{
+		x_centre = (int)(p->x_ / exp_->space_step_);
+		y_centre = (int)(p->y_ / exp_->space_step_);
+		z_centre = (int)(p->z_ / exp_->space_step_);
+		x_min = (int)((p->x_ - p->r_hydro_) / exp_->space_step_);
+		y_min = (int)((p->y_ - p->r_hydro_) / exp_->space_step_);
+		z_min = (int)((p->z_ - p->r_hydro_) / exp_->space_step_);
+		x_max = (int)((p->x_ + p->r_hydro_) / exp_->space_step_);
+		y_max = (int)((p->y_ + p->r_hydro_) / exp_->space_step_);
+		z_max = (int)((p->z_ + p->r_hydro_) / exp_->space_step_);
+		nb_step_x = (int)(exp_->solvent_.box_size_radial_ / exp_->space_step_);
+		nb_step_y = (int)(exp_->solvent_.box_size_radial_ / exp_->space_step_);
+		nb_step_z = (int)(exp_->solvent_.box_size_axial_ / exp_->space_step_);
+
+		for (int x = x_min; x <= x_max; x++)
+		{
+			for (int y = y_min; y <= y_max; y++)
+			{
+				for (int z = z_min; z <= z_max; z++)
+				{
+					R = sqrt(pow((x_centre - x), 2) + pow((y_centre - y), 2) + pow((z_centre - z), 2));
+					{
+						if (R <= p->r_hydro_)
+						{
+							if (x >= 0 & y >= 0 & z >= 0 & x <= nb_step_x & y <= nb_step_y & z <= nb_step_z)
+							{
+								r = (int)sqrt(pow(x, 2) + pow(y, 2));
+								MDF_totale += mdf_[r][z];
+							}
+							nb_case += 1;
+						}
+					}
+				}
+			}
+		}
+		photon_probability = MDF_totale / nb_case * p->abs_cross_section_ * p->quantum_yield_;
+	}
 
 	return photon_probability;
 
+	//return mdf_[r][z] * p->abs_cross_section_ * p->quantum_yield_;
 }
 
 MDF_gaussian::MDF_gaussian(Experiment *experiment, double r)
@@ -22,8 +73,8 @@ MDF_gaussian::MDF_gaussian(Experiment *experiment, double r)
 	exp_ = experiment;
 	r_ = r;
 
-	int nb_step_r = (int)(sqrt(2) * exp_->solvent_.box_size_axial_ / exp_->space_step_);
-	int nb_step_z = (int)(exp_->solvent_.box_size_radial_ / exp_->space_step_);
+	int nb_step_r = (int)(sqrt(2) * exp_->solvent_.box_size_radial_ / exp_->space_step_);
+	int nb_step_z = (int)(exp_->solvent_.box_size_axial_ / exp_->space_step_);
 
 	//allocation (https://stackoverflow.com/questions/936687/how-do-i-declare-a-2d-array-in-c-using-new)
 	mdf_ = new double*[nb_step_r];
@@ -43,23 +94,26 @@ MDF_gaussian::MDF_gaussian(Experiment *experiment, double r)
 	double radial_waist_square_nm = w_xy_ * w_xy_;
 	double axial_waist_square_nm = w_z_ * w_z_;
 	double Pi_waist_square_nm = w_xy_ * w_xy_* M_PI;
-	
+
+
 	// 1E-3 because intensity is in mW
-	double norm_coeff = exp_->opticalSetup_.laser_exc_.intensity*1E-3 / Pi_waist_square_nm/(PLANCK_CST*SPEED_OF_LIGHT/(exp_->opticalSetup_.laser_exc_.wl*1E-9));
-	
+	double norm_coeff = exp_->opticalSetup_.laser_exc_.intensity*1E-3 / Pi_waist_square_nm / (PLANCK_CST*SPEED_OF_LIGHT / (exp_->opticalSetup_.laser_exc_.wl*1E-9));
+
+
 	// Gaussian-Gaussian
+
+
 	for (int z = 0; z < nb_step_z; z++)
 	{
-		double z_c = (z - nb_step_z / 2) * exp_->space_step_;		
+		double z_c = (z - nb_step_z / 2) * exp_->space_step_;
 		double z_c_squared = z_c * z_c;
 
 		for (int r = 0; r < nb_step_r; r++)
 		{
 			double r_c = (r - nb_step_r / 2) * exp_->space_step_;
-			mdf_[r][z] = norm_coeff *  exp(-2 * r_c*r_c / radial_waist_square_nm - 2*z_c_squared/axial_waist_square_nm);
+			mdf_[r][z] = norm_coeff * exp(-2 * r_c*r_c / radial_waist_square_nm - 2 * z_c_squared / axial_waist_square_nm);
 		}
 	}
-
 }
 
 void MDF_gaussian::export_mdf()
@@ -75,12 +129,12 @@ MDF_gaussian::MDF_gaussian()
 
 MDF_gaussian::~MDF_gaussian()
 {
-/*
-int nb_step_r = exp_->solvent_.box_size_axial_ / exp_->space_step_;
-if (mdf_ != NULL)
-{
-	for (int i = 0; i < nb_step_r; ++i) {
-		delete[] mdf_[i];
-	}
-*/
+	/*
+	int nb_step_r = exp_->solvent_.box_size_axial_ / exp_->space_step_;
+	if (mdf_ != NULL)
+	{
+		for (int i = 0; i < nb_step_r; ++i) {
+			delete[] mdf_[i];
+		}
+	*/
 }
