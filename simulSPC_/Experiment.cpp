@@ -5,32 +5,35 @@
 #include "Experiment.h"
 #include "OpticalSetup.h"
 #include "MDF_gaussian.h"
+#include "ThreadPool.h"
 #include <time.h>
+#include <gsl/gsl_randist.h>
 #include <fstream>
 #include <thread>
+constexpr double N_AVOGADRO = 6.02E23;
 using namespace std;
 
 void Experiment::tick() {
 	/*for (unsigned i = 0; i < num_cpus; ++i) {
-    threads[i] = std::thread([&iomutex, i] {
-      {
-        // Use a lexical scope and lock_guard to safely lock the mutex only for
-        // the duration of std::cout usage.
-        std::lock_guard<std::mutex> iolock(iomutex);
-        std::cout << "Thread #" << i << " is running\n";
-      }
+	threads[i] = std::thread([&iomutex, i] {
+	  {
+		// Use a lexical scope and lock_guard to safely lock the mutex only for
+		// the duration of std::cout usage.
+		std::lock_guard<std::mutex> iolock(iomutex);
+		std::cout << "Thread #" << i << " is running\n";
+	  }
 
-      // Simulate important work done by the tread by sleeping for a bit...
-      std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	  // Simulate important work done by the tread by sleeping for a bit...
+	  std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-    });
+	});
   }
 
   for (auto& t : threads) {
-    t.join();
+	t.join();
   }
-  
- thread : 
+
+ thread :
  https://thispointer.com/c11-start-thread-by-member-function-with-arguments/
   https://stackoverflow.com/questions/29754438/c11-multithreading-with-class-member-function
   https://www.acodersjourney.com/top-20-cplusplus-multithreading-mistakes/
@@ -44,20 +47,20 @@ void Experiment::tick() {
   Agree. Here is a real-world example explaining your mistake. Imagine a pregnant woman : she needs 9 monthes to "make" a baby. Now if you add 7 more women, the baby won't arrive faster because pregnancy is not meant to be shared amongst several women... Same for your program, 8 core is not faster than 1 core in your case. You must have a way to split the work into parts, assign them to workers and then reassemble the results.
   */
 
-	/*As pointed out in other comments, you cannot create a thread "on a specific core", as C++ has no knowledge of such architectural details. Moreover, in the majority of cases, the operating system will be able to manage the distribution of threads among cores/processors well enough
+  /*As pointed out in other comments, you cannot create a thread "on a specific core", as C++ has no knowledge of such architectural details. Moreover, in the majority of cases, the operating system will be able to manage the distribution of threads among cores/processors well enough
 
-  std::thread th(&Task::move, particle_list_[i]);
-  std::thread th(&Task::light_matter_interraction, particle_list_[i]);
-  */
+std::thread th(&Task::move, particle_list_[i]);
+std::thread th(&Task::light_matter_interraction, particle_list_[i]);
+*/
 
 	bool is_onePhotonDetected = false;
 
-    for(int i=0; i<nb_of_particle_; i++)
-    {
-        particle_list_[i].move();
-//        particle_list_[i].inter_particle_interraction();
-		if(!is_onePhotonDetected)
-		{ 
+	for (int i = 0; i < nb_of_particle_; i++)
+	{
+		particle_list_[i].move();
+		//        particle_list_[i].inter_particle_interraction();
+		if (!is_onePhotonDetected)
+		{
 			// Photon probability -> branching
 			if (particle_list_[i].light_matter_interraction())
 			{
@@ -68,14 +71,14 @@ void Experiment::tick() {
 				is_onePhotonDetected = true;
 			}
 		}
-		macroClock_++;
-    }
+	}
+	macroClock_++;
 
 }
 
 Experiment::~Experiment() {
-delete[] particle_list_;
-delete[] photon_array_;
+	delete[] particle_list_;
+	delete[] photon_array_;
 }
 
 void Experiment::convertPhoton_vectorToList()
@@ -88,7 +91,8 @@ void Experiment::convertPhoton_vectorToList()
 		photon_array_[i] = photon_vector_[i].compress_data();
 }
 
-Experiment::Experiment() : photon_vector_(0) 
+//TODO list instead of vector for photon.
+Experiment::Experiment() : photon_vector_(0), solvent_(this)
 {
 
 	// choosing and random number generator... at "random" for now e.g. gsl_rng_default gsl_rng_taus	 gsl_rng_mt19937
@@ -98,26 +102,50 @@ Experiment::Experiment() : photon_vector_(0)
 
 	// Multi-threading preparation
 	num_cpus_ = std::thread::hardware_concurrency();
-	std::vector<std::thread> threads_(num_cpus_);
+	//std::vector<std::thread> threads_(num_cpus_);
 
 	read_ini_file();
 
-	time_step_ = init_parameter("time_step=", 0, iniFilevector_.size());
+	double simulation_time_s = init_parameter("simulation_time_s=", 0, iniFilevector_.size());
 
+	time_step_ = init_parameter("time_step=", 0, iniFilevector_.size());
+	nb_of_ticks_ = simulation_time_s / (time_step_*1E-9);
 	space_step_ = init_parameter("space_step=", 0, iniFilevector_.size());
+	double false_negative_proba = init_parameter("false_negative_proba=", 0, iniFilevector_.size());
+	// We are searching the mean µ of the a poisson probability distribution P 
+	// so that P(1;µ) >= false_negative_proba
+	probabilityPhotonThreshold_ = 1E-6;
+
+	while (gsl_ran_poisson_pdf(1, probabilityPhotonThreshold_) < false_negative_proba)
+		probabilityPhotonThreshold_ += probabilityPhotonThreshold_ * 0.1;
+
+
+
 
 	solvent_.box_size_radial_ = init_parameter("box_size_radial=", 0, iniFilevector_.size());
 	solvent_.box_size_axial_ = init_parameter("box_size_axial=", 0, iniFilevector_.size());
 	solvent_.viscosity_ = init_parameter("viscosity=", 0, iniFilevector_.size());
 	solvent_.temperature_ = init_parameter("temperature=", 0, iniFilevector_.size());
 
+	double w_microchanel_;
+	double h_microchanel_;
+	double flow_;
+
+	solvent_.w_microchanel_ = init_parameter("w_microchanel_=", 0, iniFilevector_.size());
+	solvent_.h_microchanel_ = init_parameter("h_microchanel_=", 0, iniFilevector_.size());
+	solvent_.meanFlow_ = init_parameter("meanFlow_=", 0, iniFilevector_.size());
+
 	opticalSetup_.laser_exc_.wl = init_parameter("laser_wl=", 0, iniFilevector_.size());
 	opticalSetup_.laser_exc_.intensity = init_parameter("laser_intensity=", 0, iniFilevector_.size());
 	opticalSetup_.objective_.NA = init_parameter("objective_NA=", 0, iniFilevector_.size());
 
-    // create PSF, CEF and MDF
+	// create PSF, CEF and MDF
 	// TODO read from file the type of MDF.
 	mdf_ = new MDF_gaussian(this);
+
+
+	solvent_.create_velocity_map();
+
 
 	vector<int> pos_particle_type(0);
 	int found;
@@ -139,7 +167,12 @@ Experiment::Experiment() : photon_vector_(0)
 
 	for (int i = 0; i < (pos_particle_type.size() - 1); i++)
 	{
-		int nb_of_particle_type = (int)init_parameter("nb_of_particle=", pos_particle_type[i], pos_particle_type[i + 1]);
+		double concentration_nm = init_parameter("concentration_nm=", pos_particle_type[i], pos_particle_type[i + 1]);
+		// The dimension of the box are in nm. 1µm^3 equals 1 femtoliter i.e. 1E-15 liter, so we multiply by 1E-15 x 1E-9 = 1E-24
+		double volume_nm_3 = solvent_.box_size_axial_ * solvent_.box_size_radial_ * solvent_.box_size_radial_;
+		double volume_liter = volume_nm_3 * 1E-24;
+
+		int nb_of_particle_type = (int)(concentration_nm * 1E-9 * volume_liter * N_AVOGADRO);
 		for (int j = 0; j < nb_of_particle_type; j++)
 		{
 			particle_inter = new Particle;
@@ -158,7 +191,7 @@ Experiment::Experiment() : photon_vector_(0)
 	}
 
 	nb_of_particle_ = particle_vector.size();
-    
+
 }
 
 void Experiment::write_photon_vector()
@@ -166,11 +199,11 @@ void Experiment::write_photon_vector()
 	int array_size = photon_vector_.size();
 	convertPhoton_vectorToList();
 
-	ofstream export_flux("photon_list.txt", std::ios::out | std::ios::binary);
+	ofstream export_flux("photon_list.ptn", std::ios::out | std::ios::binary);
 	//TODO header of the binary file with the time_stamp_unit.	
-	export_flux.write((char*) photon_array_, array_size*sizeof(__int64));
+	export_flux.write((char*)photon_array_, array_size * sizeof(__int64));
 	/*
-	for (int i = 0; i < array_size; i++)			
+	for (int i = 0; i < array_size; i++)
 	{
 		{
 			//export_flux.write((char*)& photon_array_[i], sizeof(__int64));

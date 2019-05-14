@@ -8,9 +8,15 @@ double MDF_gaussian::get_detection_efficiency(Particle *p)
 	double r_centre_décimal = sqrt((p->x_ * p->x_) + (p->y_ * p->y_));
 	double z_centre_décimal = p->z_;
 
-	int r_centre_entier = (int)r_centre_décimal / exp_->space_step_;
-	int z_centre_entier = (int)z_centre_décimal / exp_->space_step_;
+	int r_centre_entier = (int)(r_centre_décimal / exp_->space_step_);
+	int z_centre_entier = (int)(z_centre_décimal / exp_->space_step_);
 	double photon_probability(0);
+
+	if (p->is_point_)
+	{
+		return mdf_[r_centre_entier][z_centre_entier] * p->brightness_;
+	}
+
 
 	int x_centre, y_centre, z_centre;
 	int x_min, y_min, z_min;
@@ -22,7 +28,7 @@ double MDF_gaussian::get_detection_efficiency(Particle *p)
 
 	if (p->r_hydro_ < exp_->space_step_ / 2)
 	{
-		photon_probability = mdf_[r_centre_entier][z_centre_entier] * p->abs_cross_section_ * p->quantum_yield_;
+		photon_probability = mdf_[r_centre_entier][z_centre_entier] * p->brightness_;
 	}
 	else
 	{
@@ -73,7 +79,8 @@ MDF_gaussian::MDF_gaussian(Experiment *experiment, double r)
 	exp_ = experiment;
 	r_ = r;
 
-	int nb_step_r = (int)(sqrt(2) * exp_->solvent_.box_size_radial_ / exp_->space_step_);
+	//FIX ME, I have to add a +1, because there is an overflow of the mdf when x=axial_size and y=axial_size
+	int nb_step_r = (int)(sqrt(2) * exp_->solvent_.box_size_radial_ / exp_->space_step_) + 1;
 	int nb_step_z = (int)(exp_->solvent_.box_size_axial_ / exp_->space_step_);
 
 	//allocation (https://stackoverflow.com/questions/936687/how-do-i-declare-a-2d-array-in-c-using-new)
@@ -129,12 +136,13 @@ MDF_gaussian::MDF_gaussian()
 
 MDF_gaussian::~MDF_gaussian()
 {
-	/*
-	int nb_step_r = exp_->solvent_.box_size_axial_ / exp_->space_step_;
+	int nb_step_r = (int)(sqrt(2) * exp_->solvent_.box_size_radial_ / exp_->space_step_) + 1;
 	if (mdf_ != NULL)
 	{
 		for (int i = 0; i < nb_step_r; ++i) {
 			delete[] mdf_[i];
 		}
-	*/
+		delete[] mdf_;
+	}
+
 }

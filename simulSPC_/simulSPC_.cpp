@@ -23,21 +23,42 @@
 #include <iostream>
 #include "gsl/include/gsl/gsl_integration.h"
 #include "Experiment.h"
-
+using namespace std;
 
 int main()
 {
 
-//TODO read a ini file
-Experiment exp;
+	//TODO read a ini file
+	cout << "Initialisation" << endl;
+	Experiment exp;
 
-for(int i=0 ; i < 20; i++)
-	exp.tick();
-	
+	unsigned __int64 user_clock = 0;
+
+	// every %
+	double progression = 0;
+	double progression_step = 0.01;
+	unsigned __int64 notification_time = exp.nb_of_ticks_*progression_step;
+
+	cout << "Starting simulation" << endl;
+	for (int i = 0; i < exp.nb_of_ticks_; i++)
+	{
+		exp.tick();
+		user_clock++;
+		if (user_clock == notification_time)
+		{
+			progression += progression_step;
+			cout << progression * 100 << "%" << endl;
+			cout << "nb of detected photons : " << exp.photon_vector_.size() << endl;
+			user_clock = 0;
+		}
+	}
+
 	exp.write_photon_vector();
 
+	cout << "Simulation end" << endl;
+
 	return 0;
-	
+
 
 }
 

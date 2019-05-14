@@ -1,22 +1,33 @@
 #Exp
-  #Solvant
-    viscosity=;
-    temperature=;
-    box_size_radial=1E5;
-    box_size_axial=5E5;
-    refractive index=;
-  #Optical_setup
-    laser_wl=405;
-    laser_intensity=1;
-    objective_NA=0.95;
-  #Parameter
-    nb_of_particule=10;
-    time_step=50;
-    space_step=100;
-  #Particule
-    Dx=5E-3;
-    Dy=5E-3;
-    Dz=5E-3;
-    r_hydro=;
-    cross_section=1E-16;
-    quantum_yiel=0.95;
+  <Solvant
+    viscosity={1E-3;0}
+    temperature={293;0}
+    box_size_radial={1E4;0}
+    box_size_axial={5E4;0}
+    refractive index={0;0}
+	meanFlow_={0;0}
+	w_microchanel_={0;0}
+	h_microchanel_={0;0}
+  <Optical_setup
+    laser_wl={405;0}
+    laser_intensity={1;0}
+    objective_NA={0.95;0}
+  <Parameter
+    time_step={50;0}
+    space_step={50;0}
+	simulation_time_s={2;0}
+	false_negative_proba={1E-3;0}
+
+#Groupe of particule
+  <Particle
+    concentration_nm={0.1;0}
+    r_hydro={3;5}
+    cross_section={3E-11;0}
+    quantum_yield={0.95;0}
+	is_point={1;0}
+  <Particle
+    concentration_nm={0.1;0}
+    r_hydro={300;5}
+    cross_section={3E-11;0}
+    quantum_yield={0.95;0}
+	is_point={1;0}
