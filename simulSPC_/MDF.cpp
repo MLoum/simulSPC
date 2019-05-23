@@ -2,9 +2,19 @@
 
 
 
-double MDF::get_detection_efficiency(Particle * p)
+double MDF::get_detection_efficiency(Particle *p)
 {
-	return 0.0;
+	double psf = psf_->get_probability_absorption(p);
+	double cef = cef_->get_collection_probability(p);
+	return cef * psf;
+}
+
+void MDF::export_mdf()
+{
+}
+
+void MDF::explore_mdf()
+{
 }
 
 MDF::MDF(Experiment *exp)

@@ -2,8 +2,8 @@
   <Solvant
     viscosity={1E-3;0}
     temperature={293;0}
-    box_size_radial={1E4;0}
-    box_size_axial={5E4;0}
+    box_size_radial={1E3;0}
+    box_size_axial={2E3;0}
     refractive index={0;0}
 	meanFlow_={0;0}
 	w_microchanel_={0;0}
@@ -12,22 +12,32 @@
     laser_wl={405;0}
     laser_intensity={1;0}
     objective_NA={0.95;0}
+    laser_polarization_X={1;0}
+    laser_polarization_Y={0;0}
+    laser_polarization_Z={0;0}
+	# 0 -> gaussian-gaussian, 1-> custom
+	MDF_type={0;0}
+	# 0 -> geometric, 1 -> planewave
+	CEF_type={0;0}
+	# 0 -> gaussian, 1 -> planewave
+	PSF_type={0;0}
+	MDF_r_to_z_param={1.4;0}
   <Parameter
     time_step={50;0}
-    space_step={50;0}
-	simulation_time_s={2;0}
+    space_step={25;0}
+    angular_step={5E-2;0}
+	simulation_time_s={0.01;0}
+	is_multithreaded={0;0}
 	false_negative_proba={1E-3;0}
 
 #Groupe of particule
   <Particle
-    concentration_nm={0.1;0}
-    r_hydro={3;5}
-    cross_section={3E-11;0}
+    concentration_nm={1;0}
+    r_hydro={10;0}
+    cross_section={1E-10;0}
     quantum_yield={0.95;0}
 	is_point={1;0}
-  <Particle
-    concentration_nm={0.1;0}
-    r_hydro={300;5}
-    cross_section={3E-11;0}
-    quantum_yield={0.95;0}
-	is_point={1;0}
+	is_isotropic={0;0}
+    polarization1={1;0};
+    polarization2={0;0};
+    polarization3={0;0};

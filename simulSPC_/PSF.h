@@ -23,12 +23,11 @@ class Particle;
 class PSF
 {
 protected:
-    OpticalSetup *OpticalSetup_;
 	Experiment *exp_;
 
 public:
 	PSF();
-    PSF(OpticalSetup OpticalSetup_);
+    PSF(Experiment *exp);
     ~PSF();
 
 	/**
@@ -36,7 +35,9 @@ public:
 	 * \param    Particle &p  Particle with which to calculate the PSF
 	 * \return   The laser electrical field at the position of the particle
 	 */
-	virtual E_field get_E_field(Particle &p) = 0;
+	//virtual E_field get_E_field(Particle &p) = 0;
+	virtual double get_probability_absorption(Particle *p) = 0;
+	virtual void explore_psf() = 0;
 
 };
 

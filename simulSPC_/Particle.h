@@ -10,8 +10,13 @@
 //random -> still needed ?
 #include <random>
 #include <iostream>
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_vector.h>
 
 class Experiment;
+
+struct Monitor_variable;
+
 
 /**
  * \brief      Class containing all the information on a particle (position, angular, quantum yield, ...)
@@ -36,8 +41,23 @@ public:
 	double brightness_; //!<  precomputed value of abs_cross_section_*quantum_yield_
 
 	bool is_point_;
+	bool is_isotropic_;
 
 	Experiment *exp_;
+
+	gsl_matrix* mat_transf_ = gsl_matrix_calloc(3, 3); //!<  Matrix to transform a vector described in the referential of the particle to the laboratory referential
+	
+	gsl_matrix* mat_rot1 = gsl_matrix_calloc(3, 3);
+	gsl_matrix* mat_rot2 = gsl_matrix_calloc(3, 3);
+	gsl_matrix* mat_rot3 = gsl_matrix_calloc(3, 3);
+	gsl_matrix* mat_inter = gsl_matrix_calloc(3, 3);
+	
+
+	gsl_vector* abs_dipole_vector = gsl_vector_calloc(3);
+	gsl_vector* abs_dipole_vector_lab = gsl_vector_calloc(3);
+	gsl_vector* inter_vector = gsl_vector_calloc(3);
+
+	std::vector<Monitor_variable> monitor_variable_vector;
 
 
 public:
@@ -47,6 +67,11 @@ public:
 
 	Particle(Experiment &exp);
 	~Particle();
+	/**
+ * \brief     Called at each tick of the main clock for each particle in order to translation and rotation
+ * \details   	
+ *
+ */
 	void move();
 
 	/**
@@ -68,6 +93,15 @@ public:
 	 */
 	void inter_particle_interraction();
 
+	/**
+	 * \brief    Conveniency function for multithreaded calculation.
+
+	 */
+	bool move_and_light_matter_interraction() {
+		move(); 
+		return  light_matter_interraction();
+	}
+
 	//void set_exp(Experiment *exp) {exp_ = exp;}
 	/**
 	 * \brief    Method called just aftr the instanciation of an array of particle and acting as a constructor.
@@ -76,6 +110,12 @@ public:
 	 */
 	void initParticleParam(Experiment* exp, int ligne_start, int ligne_end);
 
+	/**
+ * \brief    Return the absorption dipole in the ->referential of the lab<-
+			
+ */
+	gsl_vector* get_rotated_abs_dipole_vector();
+
 	//void set_exp(Experiment *exp) {exp_ = exp;}
 	/**
 	 * \brief    Export in a text file the translational and angular position of a particle in order to test its adequacy with a brownian motion
@@ -83,7 +123,20 @@ public:
 	 */
 	void brownianMotionTest();
 
+	
 	void display_particle_position();
+
+	void monitor_particle(int mode=1);
+
+};
+
+struct Monitor_variable
+{
+	//double x_, y_, z_;
+	double r_, z_;
+	//double phi_x, phi_y, phi_z;
+	double e_dot_mu;
+	// add other variable if needed
 };
 
 #endif //SIMULSPC_PARTICLE_H

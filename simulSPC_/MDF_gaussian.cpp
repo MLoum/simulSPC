@@ -5,16 +5,33 @@
 
 double MDF_gaussian::get_detection_efficiency(Particle *p)
 {
-	double r_centre_décimal = sqrt((p->x_ * p->x_) + (p->y_ * p->y_));
-	double z_centre_décimal = p->z_;
+	double r_center_float = sqrt((p->x_ * p->x_) + (p->y_ * p->y_));
+	double z_center_float = p->z_;
 
-	int r_centre_entier = (int)(r_centre_décimal / exp_->space_step_);
-	int z_centre_entier = (int)(z_centre_décimal / exp_->space_step_);
+	int r_center_int = (int)(r_center_float / exp_->space_step_);
+	int z_center_int = (int)(z_center_float / exp_->space_step_);
 	double photon_probability(0);
 
 	if (p->is_point_)
 	{
-		return mdf_[r_centre_entier][z_centre_entier] * p->brightness_;
+		if (p->is_isotropic_)
+		{
+			return mdf_[r_center_int][z_center_int] * p->brightness_;
+		}
+		else
+		{
+			//FIXME
+			//return mdf_[r_center_int][z_center_int] * p->brightness_;
+
+			// absorption dipole
+			//TODO complex polarization
+			double dot_product;
+			gsl_blas_ddot(exp_->opticalSetup_.laser_exc_.polarization_, p->get_rotated_abs_dipole_vector(), &dot_product);
+			return mdf_[r_center_int][z_center_int] * p->brightness_ *dot_product*dot_product;
+
+			//gsl_blas_zdotu
+			//gsl_blas_dznrm2
+		}
 	}
 
 
@@ -28,7 +45,7 @@ double MDF_gaussian::get_detection_efficiency(Particle *p)
 
 	if (p->r_hydro_ < exp_->space_step_ / 2)
 	{
-		photon_probability = mdf_[r_centre_entier][z_centre_entier] * p->brightness_;
+		photon_probability = mdf_[r_center_int][z_center_int] * p->brightness_;
 	}
 	else
 	{
@@ -55,7 +72,7 @@ double MDF_gaussian::get_detection_efficiency(Particle *p)
 					{
 						if (R <= p->r_hydro_)
 						{
-							if (x >= 0 & y >= 0 & z >= 0 & x <= nb_step_x & y <= nb_step_y & z <= nb_step_z)
+							if (x >= 0 && y >= 0 && z >= 0 && x <= nb_step_x && y <= nb_step_y && z <= nb_step_z)
 							{
 								r = (int)sqrt(pow(x, 2) + pow(y, 2));
 								MDF_totale += mdf_[r][z];
@@ -71,7 +88,6 @@ double MDF_gaussian::get_detection_efficiency(Particle *p)
 
 	return photon_probability;
 
-	//return mdf_[r][z] * p->abs_cross_section_ * p->quantum_yield_;
 }
 
 MDF_gaussian::MDF_gaussian(Experiment *experiment, double r)
@@ -125,6 +141,20 @@ MDF_gaussian::MDF_gaussian(Experiment *experiment, double r)
 
 void MDF_gaussian::export_mdf()
 {
+	//FIXME filename etc...
+	std::ofstream outFile("mdf_gaussian.txt");
+	
+	int nb_step_r = (int)(sqrt(2) * exp_->solvent_.box_size_radial_ / exp_->space_step_) + 1;
+	int nb_step_z = (int)(exp_->solvent_.box_size_axial_ / exp_->space_step_);
+
+	for (int i = 0; i < nb_step_r; i++)
+	{
+		for (int j = 0; j < nb_step_z; j++)
+		{
+			outFile << mdf_[i][j] << " ";
+		}
+		outFile << "\n";
+	}
 }
 
 

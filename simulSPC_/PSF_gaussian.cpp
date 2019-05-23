@@ -3,17 +3,31 @@
 
 
 
-E_field PSF_gaussian::get_E_field(Particle & p)
+
+double PSF_gaussian::get_probability_absorption(Particle *p)
 {
-	return E_field();
+	double r_center_float = sqrt((p->x_ * p->x_) + (p->y_ * p->y_));
+	double z_center_float = p->z_;
+
+	int r_center_int = (int)(r_center_float / exp_->space_step_);
+	int z_center_int = (int)(z_center_float / exp_->space_step_);
+
+	return 0;
+}
+
+void PSF_gaussian::explore_psf()
+{
 }
 
 PSF_gaussian::PSF_gaussian()
 {
+
 }
 
-PSF_gaussian::PSF_gaussian(OpticalSetup OpticalSetup_)
+PSF_gaussian::PSF_gaussian(Experiment *experiment)
 {
+	exp_ = experiment;
+
 	int nb_step_r = (int) (exp_->solvent_.box_size_axial_ / exp_->space_step_);
 	int nb_step_z = (int)(exp_->solvent_.box_size_radial_ / exp_->space_step_);
 

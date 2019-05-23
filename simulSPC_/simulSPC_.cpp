@@ -21,16 +21,22 @@
 
 #include "pch.h"
 #include <iostream>
-#include "gsl/include/gsl/gsl_integration.h"
 #include "Experiment.h"
+#include <gsl/gsl_randist.h>
 using namespace std;
 
 int main()
 {
 
 	//TODO read a ini file
-	cout << "Initialisation" << endl;
+	auto start = std::chrono::steady_clock::now();
+	cout << "Initialization" << endl;
 	Experiment exp;
+	auto end = std::chrono::steady_clock::now();
+	auto diff = end - start;
+	std::cout << "Initialization finished, duration : " << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
+
+	//exp.algorithm_benchmark();
 
 	unsigned __int64 user_clock = 0;
 
@@ -40,6 +46,7 @@ int main()
 	unsigned __int64 notification_time = exp.nb_of_ticks_*progression_step;
 
 	cout << "Starting simulation" << endl;
+	start = std::chrono::steady_clock::now();
 	for (int i = 0; i < exp.nb_of_ticks_; i++)
 	{
 		exp.tick();
@@ -52,10 +59,16 @@ int main()
 			user_clock = 0;
 		}
 	}
+	end = std::chrono::steady_clock::now();
+
+	//exp.particle_list_[0].monitor_particle();
 
 	exp.write_photon_vector();
 
 	cout << "Simulation end" << endl;
+	cout << "Nb of generated photons : " << exp.photon_vector_.size() << endl;
+	diff = end - start;
+	std::cout << "Simulation duration : " << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
 
 	return 0;
 

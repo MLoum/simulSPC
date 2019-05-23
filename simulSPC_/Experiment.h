@@ -26,8 +26,13 @@ class MDF;
 #include "Solvent.h"
 #include "Particle.h"
 #include "MDF.h"
+#include "PSF.h"
 #include "Photon.h"
 #include <gsl/gsl_randist.h>
+//TODO gsl complex ?
+#include <complex>
+#include <future>
+#include "ThreadPool.h"
 
 using namespace std;
 
@@ -58,6 +63,8 @@ public:
 	friend class Particle;
 	double time_step_; //!< Time step of the simulation in \b nanosecond, typical value 50ns
 	double space_step_; //!< Space step in \b nanometer for the PSF and CEF if they are pre-computed, typical value 50nm (lambda/10)
+	double angular_step_; //!< angular step in radian for the PSF
+	
 	Solvent solvent_; //!< See the corresponding class
 	OpticalSetup opticalSetup_; //!< See the corresponding class
 	//PSF *psf_; //!< See the corresponding class
@@ -74,13 +81,24 @@ public:
 	std::vector<Photon> photon_vector_;   //!< Vector of the generated photon (time arrivals (in clock tick unit), microtime, channel). This is the main output of the software.
 	__int64 *photon_array_;
 
+
+	//Particle *particle_test;
+	//double** Test_psf_;
+
 	vector<string> iniFilevector_;
 
 	unsigned int num_cpus_;
+	ThreadPool pool_;
 
 	unsigned __int64 nb_of_ticks_;
 
 	double probabilityPhotonThreshold_;
+
+	bool is_dont_comput_flag;
+	bool is_multithreaded_;
+
+	std::future<bool> *async_futures_particle_tab;
+	std::function<bool()> *function_array_particle_;
 
 public:
 	/**
@@ -96,6 +114,8 @@ public:
 
 	void read_ini_file();
 	double init_parameter(string parameter, int ligne_start, int ligne_end);
+
+	void algorithm_benchmark();
 };
 
 

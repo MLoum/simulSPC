@@ -16,7 +16,6 @@ class OpticalSetup;
 class CEF
 {
 protected:
-	OpticalSetup *OpticalSetup_;
 	Experiment *exp_;
 
 public:
@@ -25,7 +24,8 @@ public:
 	 * \param    Particle &p  Particle with which to calculate the CEF
 	 * \return   A double with the probability ([0,1]) of detecting a photon at the position and with the orientation of the p particle.
 	 */
-	virtual double getCollectionProbability(Particle &p) = 0;
+	virtual double get_collection_probability(Particle *p) = 0;
+	CEF(Experiment *exp) {exp_ = exp;}
 	CEF();
 	~CEF();
 };

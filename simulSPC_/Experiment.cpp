@@ -6,10 +6,17 @@
 #include "OpticalSetup.h"
 #include "MDF_gaussian.h"
 #include "ThreadPool.h"
+#include "PSF_planewave.h"
+#include "PSF_gaussian.h"
+#include "CEF_geometric.h"
+#include "CEF_planewave.h"
 #include <time.h>
 #include <gsl/gsl_randist.h>
 #include <fstream>
-#include <thread>
+#include <future>
+#include <functional>
+#include <array>
+
 constexpr double N_AVOGADRO = 6.02E23;
 using namespace std;
 
@@ -52,33 +59,92 @@ void Experiment::tick() {
 std::thread th(&Task::move, particle_list_[i]);
 std::thread th(&Task::light_matter_interraction, particle_list_[i]);
 */
-
 	bool is_onePhotonDetected = false;
+	is_dont_comput_flag = false;
 
-	for (int i = 0; i < nb_of_particle_; i++)
+	if (is_multithreaded_)
 	{
-		particle_list_[i].move();
-		//        particle_list_[i].inter_particle_interraction();
-		if (!is_onePhotonDetected)
+
+		for (int i = 0; i < nb_of_particle_; i++)
 		{
-			// Photon probability -> branching
-			if (particle_list_[i].light_matter_interraction())
+			function_array_particle_[i] = std::bind(&Particle::move_and_light_matter_interraction, particle_list_[i]);
+		}
+
+		// Creates a copy of classInstace, use std::ref(classInstance) to force pass by ref
+		
+		for (int i = 0; i < nb_of_particle_; i++)
+		{
+			//async_futures_particle_tab[i] = pool_.submit(function_array_particle_[i]);
+			auto future = pool_.submit(function_array_particle_[i]);
+		}
+		
+
+		// Get result, should be equals to 4 (3+1)
+		
+
+		/*
+		// launch threads
+		for (int i = 0; i < nb_of_particle_; i++)
+		{
+			//async_futures_particle_tab[i] = std::async(launch::async, &Particle::move_and_light_matter_interraction, particle_list_[i]);					
+			
+			//auto result = pool_.enqueue(&Particle::move_and_light_matter_interraction, particle_list_[i]);
+
+			async_futures_particle_tab[i].get();
+
+		}
+		*/
+		for (int i = 0; i < nb_of_particle_; i++)
+		{
+			// if one of the particle has emmited a photon that was detected, 
+			// we inform the exp_ object so that we don't computethe light_matter_interraction 
+			// part of the particles object since only one photon can be aquired 
+			// per main_cmock tick
+			// NB : It should be different if there are more than one detector.
+			if (async_futures_particle_tab[i].get())
 			{
 				Photon ph(macroClock_, 0, 0);
 				photon_vector_.push_back(ph);
 				// Only one photon can be measured for one tick of the experiment. Hence 
 				// if one photon is detected, there is no need to compute the light_matter_interraction for the others particles.
-				is_onePhotonDetected = true;
+				is_dont_comput_flag = true;
+			}				
+		}
+	}
+	else
+	{ 	
+		for (int i = 0; i < nb_of_particle_; i++)
+		{
+			
+			particle_list_[i].move();
+			//        particle_list_[i].inter_particle_interraction();
+			if (!is_onePhotonDetected)
+			{
+				// Photon probability -> branching
+				if (particle_list_[i].light_matter_interraction())
+				{
+					Photon ph(macroClock_, 0, 0);
+					photon_vector_.push_back(ph);
+					// Only one photon can be measured for one tick of the experiment. Hence 
+					// if one photon is detected, there is no need to compute the light_matter_interraction for the others particles.
+					is_onePhotonDetected = true;
+				}
 			}
 		}
 	}
+	//particle_list_[0].monitor_particle();
 	macroClock_++;
-
+	/*polarizationX.push_back(gsl_vector_get(particle_list_[2].inter_vector, 0));
+	polarizationY.push_back(gsl_vector_get(particle_list_[2].inter_vector, 1));
+	polarizationZ.push_back(gsl_vector_get(particle_list_[2].inter_vector, 2));
+	*/
+	
 }
 
 Experiment::~Experiment() {
 	delete[] particle_list_;
 	delete[] photon_array_;
+	delete[] async_futures_particle_tab;
 }
 
 void Experiment::convertPhoton_vectorToList()
@@ -92,7 +158,7 @@ void Experiment::convertPhoton_vectorToList()
 }
 
 //TODO list instead of vector for photon.
-Experiment::Experiment() : photon_vector_(0), solvent_(this)
+Experiment::Experiment() : photon_vector_(0), solvent_(this), pool_(4)
 {
 
 	// choosing and random number generator... at "random" for now e.g. gsl_rng_default gsl_rng_taus	 gsl_rng_mt19937
@@ -102,6 +168,8 @@ Experiment::Experiment() : photon_vector_(0), solvent_(this)
 
 	// Multi-threading preparation
 	num_cpus_ = std::thread::hardware_concurrency();
+
+	pool_.init();
 	//std::vector<std::thread> threads_(num_cpus_);
 
 	read_ini_file();
@@ -111,6 +179,7 @@ Experiment::Experiment() : photon_vector_(0), solvent_(this)
 	time_step_ = init_parameter("time_step=", 0, iniFilevector_.size());
 	nb_of_ticks_ = simulation_time_s / (time_step_*1E-9);
 	space_step_ = init_parameter("space_step=", 0, iniFilevector_.size());
+	is_multithreaded_ = init_parameter("is_multithreaded=", 0, iniFilevector_.size());
 	double false_negative_proba = init_parameter("false_negative_proba=", 0, iniFilevector_.size());
 	// We are searching the mean µ of the a poisson probability distribution P 
 	// so that P(1;µ) >= false_negative_proba
@@ -119,13 +188,14 @@ Experiment::Experiment() : photon_vector_(0), solvent_(this)
 	while (gsl_ran_poisson_pdf(1, probabilityPhotonThreshold_) < false_negative_proba)
 		probabilityPhotonThreshold_ += probabilityPhotonThreshold_ * 0.1;
 
-
+	angular_step_ = init_parameter("angular_step=", 0, iniFilevector_.size());
 
 
 	solvent_.box_size_radial_ = init_parameter("box_size_radial=", 0, iniFilevector_.size());
 	solvent_.box_size_axial_ = init_parameter("box_size_axial=", 0, iniFilevector_.size());
 	solvent_.viscosity_ = init_parameter("viscosity=", 0, iniFilevector_.size());
 	solvent_.temperature_ = init_parameter("temperature=", 0, iniFilevector_.size());
+	solvent_.refractive_index_ = init_parameter("refractive index=", 0, iniFilevector_.size());
 
 	double w_microchanel_;
 	double h_microchanel_;
@@ -138,11 +208,49 @@ Experiment::Experiment() : photon_vector_(0), solvent_(this)
 	opticalSetup_.laser_exc_.wl = init_parameter("laser_wl=", 0, iniFilevector_.size());
 	opticalSetup_.laser_exc_.intensity = init_parameter("laser_intensity=", 0, iniFilevector_.size());
 	opticalSetup_.objective_.NA = init_parameter("objective_NA=", 0, iniFilevector_.size());
+	gsl_vector_set(opticalSetup_.laser_exc_.polarization_, 0, init_parameter("laser_polarization_X=", 0, iniFilevector_.size()));
+	gsl_vector_set(opticalSetup_.laser_exc_.polarization_, 1, init_parameter("laser_polarization_Y=", 0, iniFilevector_.size()));
+	gsl_vector_set(opticalSetup_.laser_exc_.polarization_, 2, init_parameter("laser_polarization_Z=", 0, iniFilevector_.size()));
+	//TODO normalize vector polarisation
+	//gsl_vector_scale(gsl_vector_set, 1 / normalization);
+	//gsl_vector_scale(gsl_vector_set, 1 / normalization);
 
-	// create PSF, CEF and MDF
-	// TODO read from file the type of MDF.
-	mdf_ = new MDF_gaussian(this);
+	int mdf_type = init_parameter("MDF_type=", 0, iniFilevector_.size());
+	// TODO enum or #define 
+	if (mdf_type == 0)
+	{
+		//Phenomelogic Gaussian-gaussian MDF
+		mdf_ = new MDF_gaussian(this);
+		// TODO abstract class flor MDF and create custom MDF class
+		//mdf_->r_ = init_parameter("MDF_r_to_z_param=", 0, iniFilevector_.size());
+	}
+	else
+	{
+		// custom MDF
+		mdf_ = new MDF(this);
+		int psf_type = init_parameter("PSF_type=", 0, iniFilevector_.size());
+		if (psf_type == 0)
+		{
+			mdf_->set_psf(new PSF_gaussian(this));
+		}
+		else if (psf_type == 1)
+		{
+			mdf_->set_psf(new PSF_planewave(this));
+		}
 
+		int cef_type = init_parameter("CEF_type=", 0, iniFilevector_.size());
+		if (cef_type == 0)
+		{
+			mdf_->set_cef(new CEF_geometric(this));
+		}
+		else if (cef_type == 1)
+		{
+
+			mdf_->set_cef(new CEF_planewave(this));
+		}
+	}
+
+	mdf_->export_mdf();
 
 	solvent_.create_velocity_map();
 
@@ -189,8 +297,51 @@ Experiment::Experiment() : photon_vector_(0), solvent_(this)
 	{
 		particle_list_[i] = particle_vector[i];
 	}
-
+	//TODO is nb_of_particle_ is zero
 	nb_of_particle_ = particle_vector.size();
+
+	//////////////////////////////////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+	
+	/*particle_test = new Particle;
+	particle_test->y_ = 0;
+	int nb_step = (int)(solvent_.box_size_radial_ / (space_step_)) + 1;
+	double valeur_inter;
+	Test_psf_ = new double* [nb_step];
+	for (int i = 0; i < nb_step; ++i)
+		Test_psf_[i] = new double[nb_step];
+	for (int z = 0; z < nb_step; z++)
+	{
+		particle_test->z_ = z * space_step_ * 5 - (solvent_.box_size_axial_ / 2);
+		for (int x = 0; x < nb_step; x++)
+		{
+			particle_test->x_ = x * space_step_ - (solvent_.box_size_radial_ / 2);
+			delete mdf_->psf_;
+			mdf_->psf_ = new PSF_planewave();
+			mdf_->psf_->get_laser_intensity(this,*particle_test);
+			valeur_inter = mdf_->psf_->I_x;
+			Test_psf_[z][x]= valeur_inter;
+		}
+	}
+	ofstream flux("Test_psf_zx.txt");
+	for (int z = 0; z < nb_step; z++)
+	{
+		for (int x = 0; x < nb_step; x++)
+		{
+			flux << z << "; " << x << "; " << Test_psf_[z][x] << endl;
+		}
+	}*/
+
+	//Multi-thread
+	if (is_multithreaded_)
+	{
+		async_futures_particle_tab = new std::future<bool>[nb_of_particle_];
+		//std::array< std::function<bool()>, 0> function_array;
+		std::function<bool()> *function_array_particle_ = new std::function<bool()>[nb_of_particle_];
+		for (int i = 0; i < nb_of_particle_; i++)
+		{
+			function_array_particle_[i] = std::bind(&Particle::move_and_light_matter_interraction, particle_list_[i]);
+		}
+	}
 
 }
 
@@ -265,4 +416,75 @@ double Experiment::init_parameter(string parameter, int ligne_start, int ligne_e
 	}
 
 	return value;
+}
+
+void Experiment::algorithm_benchmark()
+{
+	// choosing and random number generator... at "random" for now e.g. gsl_rng_default gsl_rng_taus	 gsl_rng_mt19937
+	rngGenerator_ = gsl_rng_alloc(gsl_rng_taus2);
+	//rngGenerator_ = gsl_rng_alloc(gsl_rng_mt19937);
+	//rngGenerator_ = gsl_rng_alloc(gsl_rng_ranlxs0);
+	//rngGenerator_ = gsl_rng_alloc(gsl_rng_ranlxd1);
+	//rngGenerator_ = gsl_rng_alloc(gsl_rng_cmrg);
+	//rngGenerator_ = gsl_rng_alloc(gsl_rng_gfsr4);
+	//rngGenerator_ = gsl_rng_alloc(gsl_rng_ranf);		
+	//
+	
+
+	// rng seed
+	gsl_rng_set(rngGenerator_, time(NULL));
+
+	int nb_of_trial = 1E8;
+
+	std::cout << "Starting benchmark with " << nb_of_trial <<"nb of trial" << std::endl;
+
+	double a = 5;
+	double b;
+	auto start = std::chrono::steady_clock::now();
+	for (int i = 0; i < nb_of_trial; i++)
+	{
+		b = a * i;
+	}
+	auto end = std::chrono::steady_clock::now();
+	auto diff = end - start;
+	std::cout << "multiplication cost : " << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
+
+	start = std::chrono::steady_clock::now();
+	for (int i = 0; i < nb_of_trial; i++)
+	{
+		gsl_ran_gaussian(rngGenerator_, 1);
+	}
+	end = std::chrono::steady_clock::now();
+	diff = end - start;
+	std::cout << "gsl_ran_gaussian cost : " << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
+
+	start = std::chrono::steady_clock::now();
+	for (int i = 0; i < nb_of_trial; i++)
+	{
+		gsl_ran_gaussian_ziggurat(rngGenerator_, 1);
+	}
+	end = std::chrono::steady_clock::now();
+	diff = end - start;
+	std::cout << "gsl_ran_gaussian_ziggurat cost : " << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
+
+
+	start = std::chrono::steady_clock::now();
+	for (int i = 0; i < nb_of_trial; i++)
+	{
+		gsl_ran_gaussian_ratio_method(rngGenerator_, 1);
+	}
+	end = std::chrono::steady_clock::now();
+	diff = end - start;
+	std::cout << "gsl_ran_gaussian_ratio_method cost : " << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
+
+	start = std::chrono::steady_clock::now();
+	for (int i = 0; i < nb_of_trial; i++)
+	{
+		gsl_ran_poisson(rngGenerator_, 1);
+	}
+	end = std::chrono::steady_clock::now();
+	diff = end - start;
+	std::cout << "gsl_ran_poisson cost : " << std::chrono::duration <double, std::milli>(diff).count() << " ms" << std::endl;
+
+
 }

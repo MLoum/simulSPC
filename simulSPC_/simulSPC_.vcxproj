@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="CEF.h" />
     <ClInclude Include="CEF_geometric.h" />
+    <ClInclude Include="CEF_planewave.h" />
     <ClInclude Include="Experiment.h" />
     <ClInclude Include="E_field.h" />
     <ClInclude Include="MDF.h" />
@@ -174,10 +175,12 @@
     <ClInclude Include="PSF_planewave.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Solvent.h" />
+    <ClInclude Include="ThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CEF.cpp" />
     <ClCompile Include="CEF_geometric.cpp" />
+    <ClCompile Include="CEF_planewave.cpp" />
     <ClCompile Include="Experiment.cpp" />
     <ClCompile Include="MDF.cpp" />
     <ClCompile Include="MDF_gaussian.cpp" />

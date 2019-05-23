@@ -5,6 +5,7 @@
 #ifndef SIMULSPC_OPTICALSETUP_H
 #define SIMULSPC_OPTICALSETUP_H
 
+#include <gsl/gsl_vector.h>
 
 /**
  * \brief     Excitation Laser
@@ -15,7 +16,9 @@ struct laser_exc
 {
     double wl; //!< in nanometer
     double intensity; //!< in mW. Laser intensity, that is to say the laser power integrated on all the the beam surface 
-	//TODO polarisation
+	gsl_vector* polarization_ = gsl_vector_calloc(3);
+	//TODO 
+	gsl_vector_complex* polarizationC_ = gsl_vector_complex_calloc(3);
 };
 
 
@@ -63,3 +66,4 @@ public:
 
 
 #endif //SIMULSPC_OPTICALSETUP_H
+

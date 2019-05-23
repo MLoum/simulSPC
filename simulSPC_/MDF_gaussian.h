@@ -13,8 +13,8 @@ private:
 	double r_; //!< ratio of Axial waist (w_z_) over radial waist (w_xy_). This is an empirical value.
 public:
 	double get_detection_efficiency(Particle *p);
-	MDF_gaussian(Experiment *experiment, double r=10.0);
-	void export_mdf();
+	MDF_gaussian(Experiment *experiment, double r=2);
+	virtual void export_mdf();
 	//MDF_gaussian();
 	~MDF_gaussian();
 };

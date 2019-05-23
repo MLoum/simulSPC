@@ -22,11 +22,14 @@ protected :
 
 
 public:
-	virtual double get_detection_efficiency(Particle *p) = 0;
-	virtual void export_mdf() = 0;
+	virtual double get_detection_efficiency(Particle *p);
+	virtual void export_mdf();
+	virtual void explore_mdf();
 	MDF(Experiment *exp);
 	MDF();
 	~MDF();
+	void set_psf(PSF *psf) { psf_ = psf;}
+	void set_cef(CEF *cef) { cef_ = cef; }
 };
 
 #endif //SIMULSPC_MDF_H

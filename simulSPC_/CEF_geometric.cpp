@@ -2,7 +2,7 @@
 
 
 
-double CEF_geometric::getCollectionProbability(Particle & p)
+double CEF_geometric::get_collection_probability(Particle *p)
 {
 	/*
 	LoEmission = 510;
@@ -46,6 +46,12 @@ TailleTabSur2 = Param->TailleTableau/2;
 
 CEF_geometric::CEF_geometric()
 {
+}
+
+CEF_geometric::CEF_geometric(Experiment *exp)
+{
+	exp_ = exp;
+	//TODO allocation and calculation CEF
 }
 
 
